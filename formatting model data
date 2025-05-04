@@ -1,0 +1,19 @@
+How to format a neural network model's weights and biases
+
+Note: the connections and nodes in the program are always ordered in the same way, making this very simple
+
+1. list all weights
+
+e.g.
+
+0.03 0.02 -0.04 0.06 -0.01
+
+the model will go through each connection in it's lists of connections and set the weights
+
+2. list biases of hidden nodes
+
+e.g.
+
+-0.2 0.4 0.1 -0.3
+
+the model will go through each hidden node and update the bias
