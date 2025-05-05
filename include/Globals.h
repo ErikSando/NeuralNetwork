@@ -15,4 +15,6 @@
 
 #define N_LAYERS (N_HIDDEN_LAYERS + 1) // excludes input layer
 
+#define TRAINING_ROWS 60000
+
 extern void StartConsoleLoop();

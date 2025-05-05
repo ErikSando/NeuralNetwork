@@ -1,10 +1,10 @@
 #include <cmath>
 
-#include <Utility.h>
 #include <DataParser.h>
+#include <Utility.h>
 
-ImageData* DataParser::ParseInputFile(const int number, const std::string& filepath) {
-    ImageData* data = new ImageData{ .number = number };
+ImageData* DataParser::ParseInputFile(const int digit, const std::string& filepath) {
+    ImageData* data = new ImageData{ .digit = digit };
 
     std::string raw_text = Utility::ReadFile(filepath);
     std::string current_val = "";
@@ -47,7 +47,7 @@ ImageData* DataParser::GetRowImageData(const int row, const std::string& csv_pat
 
         if (current_val != "") {
             if (column) imagedata->pixels[column] = std::stoi(current_val);
-            else imagedata->number = std::stoi(current_val);
+            else imagedata->digit = std::stoi(current_val);
 
             current_val = "";
             column++;
@@ -65,7 +65,7 @@ int num_digits(int n) {
 }
 
 void DataParser::PrintData(ImageData* data) {
-    std::cout << "Digit: " << data->number << std::endl;
+    std::cout << "Digit: " << data->digit << std::endl;
 
     for (int r = 0; r < IMAGE_ROWS; r++) {
         for (int c = 0; c < IMAGE_COLUMNS; c++) {

@@ -3,9 +3,9 @@
 #include <chrono>
 
 #include <Globals.h>
-#include <Utility.h>
-#include <NeuralNetwork.h>
 #include <DataParser.h>
+#include <NeuralNetwork.h>
+#include <Utility.h>
 
 int main() {
     Random::Init();
@@ -80,8 +80,8 @@ int main() {
     // //     std::cout << i << ": " << output4[i] << ", " << confidences4[i] << std::endl;
     // // }
 
-    // std::array<float, N_OUTPUT_NODES> true_output1 = Utility::GetTrueOutputs(data->number);
-    // std::array<float, N_OUTPUT_NODES> true_output2 = Utility::GetTrueOutputs(data2->number);
+    // std::array<float, N_OUTPUT_NODES> true_output1 = Utility::GetTrueOutputs(data->digit);
+    // std::array<float, N_OUTPUT_NODES> true_output2 = Utility::GetTrueOutputs(data2->digit);
 
     // float loss1 = Utility::LossFunctions::CategoricalCrossEntropy(true_output1, output1);
     // float loss2 = Utility::LossFunctions::CategoricalCrossEntropy(true_output2, output2);

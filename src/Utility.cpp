@@ -1,13 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
-#include <cmath>
 
 #include <Utility.h>
 
-const float epsilon = 1e-15;
+const float epsilon = 1e-15f;
 
 template<typename T>
 T Clamp(T value, T min, T max) {
@@ -71,7 +71,7 @@ namespace Utility {
     }
 
     std::array<float, N_OUTPUT_NODES> GetTrueOutputs(int digit) {
-        assert(digit > 0 && digit < N_OUTPUT_NODES);
+        assert(digit >= 0 && digit < N_OUTPUT_NODES);
 
         std::array<float, N_OUTPUT_NODES> true_outputs{};
         true_outputs[digit] = 1.0f;

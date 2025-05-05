@@ -2,8 +2,8 @@
 #include <sstream>
 
 #include <Globals.h>
-#include <NeuralNetwork.h>
 #include <DataParser.h>
+#include <NeuralNetwork.h>
 #include <Utility.h>
 
 void StartConsoleLoop() {
@@ -30,6 +30,9 @@ void StartConsoleLoop() {
         if (cmd == "exit") {
             break;
         }
+        else if (cmd == "help") {
+
+        }
         else if (cmd == "save") {
             if (args.size() < 2) {
                 std::cout << "Insufficient arguments" << std::endl;
@@ -40,6 +43,8 @@ void StartConsoleLoop() {
             std::string savepath = args.at(1);
 
             network.SaveModel(savepath);
+
+            std::cout << "Saved model data to " << savepath << std::endl;
         }
         else if (cmd == "upload") {
             if (args.size() < 2) {
@@ -51,6 +56,8 @@ void StartConsoleLoop() {
             std::string savepath = args.at(1);
 
             network.UploadModel(savepath);
+
+            std::cout << "Uploaded data from " << savepath << std::endl;
         }
         else if (cmd == "id") {
             if (args.size() < 2) {
@@ -72,6 +79,7 @@ void StartConsoleLoop() {
 
             std::array<float, N_OUTPUT_NODES> outputs = network.GetOutputs(data->pixels);
 
+            // repeated code, TODO: prevent repeating
             float largest = 0;
             int l_digit = -1;
 
@@ -88,9 +96,63 @@ void StartConsoleLoop() {
 
             if (digit_specified) {
                 std::array<float, N_OUTPUT_NODES> true_outputs = Utility::GetTrueOutputs(digit);
+
+                #ifndef NDEBUG
+
+                for (int i = 0; i < 10; i++) {
+                    float expected = (i == data->digit) ? 1.0f : 0.0f;
+                    assert(true_outputs[i] == expected);
+                }
+
+                #endif
+
                 float loss = Utility::LossFunctions::CategoricalCrossEntropy(true_outputs, outputs);
-                std::cout << "Loss: " << loss << " (lower means more accurate)" << std::endl;
+                std::cout << "CCE Loss: " << loss << " (lower means more accurate)" << std::endl;
             }
+        }
+        else if (cmd == "lr") {
+            if (args.size() < 2) {
+                std::cout << "Insufficient arguments" << std::endl;
+                std::cout << "Usage: lr [learning rate]" << std::endl;
+                continue;
+            }
+
+            int learning_rate = std::stoi(args.at(1));
+
+            network.SetLearningRate(learning_rate);
+            std::cout << "Set learning rate to " << learning_rate << std::endl;
+        }
+        else if (cmd == "train") {
+            int iterations = 1;
+            
+            if (args.size() > 1) {
+                iterations = std::stoi(args.at(1));
+            }
+    
+            std::cout << "Training..." << std::endl;
+    
+            network.Train(iterations, "./data/mnistdata/mnist_train.csv");
+    
+            std::cout << "Training complete for " << iterations << " iterations." << std::endl;
+        }
+        else if (cmd == "test") {
+            int iterations = 1;
+            
+            if (args.size() > 1) {
+                iterations = std::stoi(args.at(1));
+            }
+    
+            std::cout << "Testing..." << std::endl;
+    
+            TestingData* t_data = network.Test(iterations, "./data/mnistdata/mnist_test.csv");
+    
+            std::cout << "Testing complete for " << iterations << " iterations." << std::endl;
+
+            int c = t_data->correct;
+            int ic = t_data->incorrect;
+
+            std::cout << "Correct: " << c << ", incorrect: " << ic << std::endl;
+            std::cout << "Accuracy: " << (100 * ((float)c / (float)(c + ic))) << "% (" << c << "/" << (c + ic) << ")" << std::endl;
         }
     }
 }

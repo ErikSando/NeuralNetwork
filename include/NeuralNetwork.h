@@ -1,9 +1,8 @@
 #pragma once
 
 #include <iostream>
-
-#include <vector>
 #include <array>
+#include <vector>
 
 #include <Globals.h>
 
@@ -23,6 +22,11 @@ struct Layer {
     std::vector<Node*> nodes;
 };
 
+struct TestingData {
+    int correct = 0;
+    int incorrect = 0;
+};
+
 class NeuralNetwork {
     public:
 
@@ -33,7 +37,11 @@ class NeuralNetwork {
     
     //static std::array<float, N_OUTPUT_NODES> GetConfidences(const std::array<float, N_OUTPUT_NODES> outputs);
 
-    void Train();
+    void Train(const int iterations, const std::string& trainpath, const bool newpath = false);
+    // void SetLearningRate(float lr) : learning_rate(lr) {}
+    void SetLearningRate(float lr);
+
+    TestingData* Test(const int iterations, const std::string& trainpath, const bool newpath = false);
 
     bool SaveModel(const std::string& savepath);
     void UploadModel(const std::string& savepath);
@@ -46,6 +54,9 @@ class NeuralNetwork {
     std::array<Layer*, N_LAYERS> layers; // doesn't include the input layer
 
     int current_layer = 0;
+    float learning_rate = 0.001;
+    int current_row = 1; // current row in the training data
+    int c_training_row = 1; // current row in the testing data
 
     void ClearNodes();
     void AddLayer(Layer* layer);
