@@ -29,6 +29,18 @@ namespace Random {
 }
 
 namespace Utility {
+    // void InitNodeCounts() {
+    //     int starting_amount = 128;
+    //     int nhn = 0;
+
+    //     for (int i = 0; i < N_HIDDEN_LAYERS; i++) {
+    //         N_NODES[i] = starting_amount / (i + 1);
+    //         nhn += N_NODES[i];
+    //     }
+
+    //     N_HIDDEN_NODES = nhn;
+    // }
+
     std::string ReadLine(const int line, const std::string& filepath) {
         std::ifstream input(filepath);
     
@@ -79,7 +91,7 @@ namespace Utility {
         return true_outputs;
     }
 
-    namespace ActivationFunctions {
+    namespace Activation {
         float Sigmoid(float z) {
             return 1.0f / (1.0f + std::exp(-z));
         }
@@ -94,7 +106,7 @@ namespace Utility {
         }
     }
 
-    namespace LossFunctions {
+    namespace Loss {
         float CategoricalCrossEntropy(std::array<float, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs) {
             float loss = 0.0f;
             

@@ -1,0 +1,14 @@
+Fix upload command
+
+Make the neural network initialisation and training code more flexible
+
+Progress bars (or any form of progress indicator) for train and test commands
+
+Implement batches (set default size to 32)
+
+Use matrix multiplication for calculating outputs
+
+Test with 10 epochs
+- Goal: 97%
+
+

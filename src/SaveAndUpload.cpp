@@ -7,15 +7,25 @@
 bool NeuralNetwork::SaveModel(const std::string& savepath) {
     std::ofstream output(savepath, std::ios::trunc);
 
-    int num_connections[N_LAYERS];
+    int num_connections[N_LAYERS] = {
+        HIDDEN_LAYER_1_SIZE * N_INPUT_NODES,
+        HIDDEN_LAYER_1_SIZE * HIDDEN_LAYER_2_SIZE,
+        HIDDEN_LAYER_2_SIZE * N_OUTPUT_NODES
+    };
 
-    num_connections[0] = N_NODES_PER_HIDDEN_LAYER * N_INPUT_NODES;
-    num_connections[N_LAYERS - 1] = N_NODES_PER_HIDDEN_LAYER * N_OUTPUT_NODES;
+    // num_connections[0] = N_NODES_PER_HIDDEN_LAYER * N_INPUT_NODES;
+    // num_connections[N_LAYERS - 1] = N_NODES_PER_HIDDEN_LAYER * N_OUTPUT_NODES;
 
-    int total_connections = num_connections[0] + num_connections[N_LAYERS - 1];
+    // int total_connections = num_connections[0] + num_connections[N_LAYERS - 1];
 
-    for (int i = 1; i < N_LAYERS - 1; i++) {
-        num_connections[i] = N_NODES_PER_HIDDEN_LAYER * N_NODES_PER_HIDDEN_LAYER;
+    // for (int i = 1; i < N_LAYERS - 1; i++) {
+    //     num_connections[i] = N_NODES_PER_HIDDEN_LAYER * N_NODES_PER_HIDDEN_LAYER;
+    //     total_connections += num_connections[i];
+    // }
+
+    int total_connections = 0;
+
+    for (int i = 0; i < N_LAYERS; i++) {
         total_connections += num_connections[i];
     }
 
@@ -52,21 +62,30 @@ bool NeuralNetwork::SaveModel(const std::string& savepath) {
 void NeuralNetwork::UploadModel(const std::string& savepath) {
     std::string raw_text = Utility::ReadFile(savepath);
 
-    // upload weights data
     int i = 0;
     char c = raw_text.at(i);
     
     std::string current_val = "";
 
-    int num_connections[N_LAYERS];
+    int num_connections[N_LAYERS] = {
+        HIDDEN_LAYER_1_SIZE * N_INPUT_NODES,
+        HIDDEN_LAYER_1_SIZE * HIDDEN_LAYER_2_SIZE,
+        HIDDEN_LAYER_2_SIZE * N_OUTPUT_NODES
+    };
 
-    num_connections[0] = N_NODES_PER_HIDDEN_LAYER * N_INPUT_NODES;
-    num_connections[N_LAYERS - 1] = N_NODES_PER_HIDDEN_LAYER * N_OUTPUT_NODES;
+    // num_connections[0] = N_NODES_PER_HIDDEN_LAYER * N_INPUT_NODES;
+    // num_connections[N_LAYERS - 1] = N_NODES_PER_HIDDEN_LAYER * N_OUTPUT_NODES;
 
-    int total_connections = num_connections[0] + num_connections[N_LAYERS - 1];
+    // int total_connections = num_connections[0] + num_connections[N_LAYERS - 1];
 
-    for (int i = 1; i < N_LAYERS - 1; i++) {
-        num_connections[i] = N_NODES_PER_HIDDEN_LAYER * N_NODES_PER_HIDDEN_LAYER;
+    // for (int i = 1; i < N_LAYERS - 1; i++) {
+    //     num_connections[i] = N_NODES_PER_HIDDEN_LAYER * N_NODES_PER_HIDDEN_LAYER;
+    //     total_connections += num_connections[i];
+    // }
+
+    int total_connections = 0;
+
+    for (int i = 0; i < N_LAYERS; i++) {
         total_connections += num_connections[i];
     }
 
@@ -74,6 +93,7 @@ void NeuralNetwork::UploadModel(const std::string& savepath) {
     int layer = 0;
     int connection = 0;
 
+    // upload weights data
     while (c != '\n' && i < raw_text.size()) {
         c = raw_text.at(i++);
 
@@ -88,7 +108,8 @@ void NeuralNetwork::UploadModel(const std::string& savepath) {
                 layer++;
 
                 if (layer >= N_LAYERS) {
-                    std::cerr << "Too many weights, reached limit of: " << n_weights << ". Ignoring remaining weights." << std::endl;
+                    std::cout << current_val << std::endl;
+                    std::cerr << "Too many weights, reached limit of " << n_weights << ". Ignoring remaining weights." << std::endl;
                     break;
                 }
             }
@@ -119,6 +140,7 @@ void NeuralNetwork::UploadModel(const std::string& savepath) {
 
         if (current_val != "") {
             if (hidden_node >= N_HIDDEN_NODES) {
+                std::cout << current_val << std::endl;
                 std::cerr << "Too many biases, reached limit of " << N_HIDDEN_NODES << ". Ignoring remaining biases." << std::endl;
                 break;
             }

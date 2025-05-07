@@ -57,6 +57,7 @@ class NeuralNetwork {
     float learning_rate = 0.001;
     int current_row = 1; // current row in the training data
     int c_training_row = 1; // current row in the testing data
+    int reg_str = 0.0001; // regularisation strength, denoted lambda i believe
 
     void ClearNodes();
     void AddLayer(Layer* layer);

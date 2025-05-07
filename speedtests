@@ -1,0 +1,21 @@
+* tests run in debug mode
+
+before batching
+
+train 100: 3812
+train 500: 18123
+
+after batching (size 32)
+
+train 100: 
+train 500: 
+
+before matrix multiplication
+
+train 100: 
+train 500: 
+
+after matrix multiplication
+
+train 100: 
+train 500: 

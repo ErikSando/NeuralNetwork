@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <Globals.h>
+#include <Matrix.h>
 
 namespace Random {
     void Init();
@@ -13,17 +14,21 @@ namespace Random {
 }
 
 namespace Utility {
+    void InitNodeCounts();
+
     std::string ReadLine(const int line, const std::string& filepath);
     std::string ReadFile(const std::string& filepath);
     std::array<float, N_OUTPUT_NODES> GetTrueOutputs(int digit);
 
-    namespace ActivationFunctions {
+    Matrix* MatrixMultiply(Matrix* matrix1, Matrix* matrix2);
+
+    namespace Activation {
         float Sigmoid(float z);
         float ReLU(float z);
         float Tanh(float z);
     }
     
-    namespace LossFunctions {
+    namespace Loss {
         float CategoricalCrossEntropy(std::array<float, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs);
         float MeanSquaredError(std::array<float, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs);
     }
