@@ -6,6 +6,9 @@ struct Matrix {
     std::vector<float> elements{};
     int rows;
     int columns;
+
+    Matrix operator*(const Matrix& other);
+    Matrix operator+(const Matrix& other);
 };
 
 // I was writing a more general purpose matrix class, but I want performance so I am making it simpler

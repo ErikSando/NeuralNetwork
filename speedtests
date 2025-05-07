@@ -1,5 +1,7 @@
 * tests run in debug mode
 
+* i will probably add matrix multiplication before batching
+
 before batching
 
 train 100: 3812

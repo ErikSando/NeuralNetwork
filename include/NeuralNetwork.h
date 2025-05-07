@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <Globals.h>
+#include <Matrix.h>
 
 struct Node {
     float value = 0;
@@ -38,8 +39,8 @@ class NeuralNetwork {
     //static std::array<float, N_OUTPUT_NODES> GetConfidences(const std::array<float, N_OUTPUT_NODES> outputs);
 
     void Train(const int iterations, const std::string& trainpath, const bool newpath = false);
-    // void SetLearningRate(float lr) : learning_rate(lr) {}
-    void SetLearningRate(float lr);
+    void SetLearningRate(const float lr);
+    void SetBatchSize(const int bs);
 
     TestingData* Test(const int iterations, const std::string& trainpath, const bool newpath = false);
 
@@ -48,17 +49,16 @@ class NeuralNetwork {
 
     private:
 
-    std::array<Node*, N_INPUT_NODES> input_nodes;
-    std::array<Node*, N_HIDDEN_NODES> hidden_nodes;
-    std::array<Node*, N_OUTPUT_NODES> output_nodes;
-    std::array<Layer*, N_LAYERS> layers; // doesn't include the input layer
+    Matrix h1_weights;
+    Matrix h2_weights;
+    Matrix out_weights;
 
-    int current_layer = 0;
+    Matrix h1_biases;
+    Matrix h2_biases;
+
     float learning_rate = 0.001;
+    int batch_size = 32;
     int current_row = 1; // current row in the training data
     int c_training_row = 1; // current row in the testing data
     int reg_str = 0.0001; // regularisation strength, denoted lambda i believe
-
-    void ClearNodes();
-    void AddLayer(Layer* layer);
 };

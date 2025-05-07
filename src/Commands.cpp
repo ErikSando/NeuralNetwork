@@ -35,6 +35,7 @@ void StartConsoleLoop() {
             std::cout << "help:\n- Shows this menu." << std::endl;
             std::cout << "train [iterations]:\n- Train the model with the number of iterations specified. One iteration uses one image." << std::endl;
             std::cout << "test [iterations]:\n- Test the model with the number of iterations specified. One iteration uses one image. The accuracy will be printed at the end." << std::endl;
+            std::cout << "bs [batch size]:\n- Set the batch size of the model. Default value is 32. Small values will significantly limit training speed." << std::endl;
             std::cout << "lr [learning rate]:\n- Set the learning rate of the model. Default value is 0.001. Large values may break the model." << std::endl;
             std::cout << "save [save path]\n- Save model data to the specified save file." << std::endl;
             std::cout << "upload [save path]:\n- (currently not working correctly) Upload model data from the specified save file." << std::endl;
@@ -128,6 +129,18 @@ void StartConsoleLoop() {
 
             network.SetLearningRate(learning_rate);
             std::cout << "Set learning rate to " << learning_rate << std::endl;
+        }
+        else if (cmd == "bs") {
+            if (args.size() < 2) {
+                std::cout << "Insufficient arguments" << std::endl;
+                std::cout << "Usage: bs [batch size]" << std::endl;
+                continue;
+            }
+
+            float batch_size = std::stoi(args.at(1));
+
+            network.SetBatchSize(batch_size);
+            std::cout << "Set batch size to " << batch_size << std::endl;
         }
         else if (cmd == "train") {
             int iterations = 1;

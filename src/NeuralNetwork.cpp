@@ -5,182 +5,105 @@
 #include <Utility.h>
 
 NeuralNetwork::NeuralNetwork() {
-    for (int a = 0; a < N_INPUT_NODES; a++) {
-        Node* input_node = new Node;
-        input_nodes[a] = input_node;
-    }
-
-    std::array<Node*, HIDDEN_LAYER_1_SIZE> l1_hidden_nodes;
-
-    Layer* hidden_layer_1 = new Layer;
-
     float weight_max = 6 / std::sqrt(N_INPUT_NODES + N_OUTPUT_NODES);
     float weight_min = -weight_max;
 
-    int hidden_index = 0;
+    h1_weights.rows = HIDDEN_LAYER_1_SIZE;
+    h1_weights.columns = N_INPUT_NODES;
+    int size = HIDDEN_LAYER_1_SIZE * N_INPUT_NODES;
+    h1_weights.elements.resize(size);
+    h1_weights.elements = Utility::RandomMatrixElements(size, weight_min, weight_max);
 
-    // TODO: find a smarter way to create hidden layers, so I can adjust settings in Globals.h without rewriting the code here and it will work
+    h2_weights.rows = HIDDEN_LAYER_2_SIZE;
+    h2_weights.columns = HIDDEN_LAYER_1_SIZE;
+    size = HIDDEN_LAYER_2_SIZE * HIDDEN_LAYER_1_SIZE;
+    h2_weights.elements.resize(size);
+    h2_weights.elements = Utility::RandomMatrixElements(size, weight_min, weight_max);
 
-    for (int a = 0; a < HIDDEN_LAYER_1_SIZE; a++) {
-        Node* hidden_node = new Node;
+    out_weights.rows = N_OUTPUT_NODES;
+    out_weights.columns = HIDDEN_LAYER_2_SIZE;
+    size = N_OUTPUT_NODES * HIDDEN_LAYER_2_SIZE;
+    out_weights.elements.resize(size);
+    out_weights.elements = Utility::RandomMatrixElements(size, weight_min, weight_max);
 
-        hidden_nodes[hidden_index++] = hidden_node;
-        hidden_layer_1->nodes.emplace_back(hidden_node);
-        l1_hidden_nodes[a] = hidden_node;
+    h1_biases.rows = HIDDEN_LAYER_1_SIZE;
+    h1_biases.columns = 1;
+    h1_biases.elements.resize(HIDDEN_LAYER_1_SIZE, 0.0f);
 
-        // connect with every input node
-        for (int b = 0; b < N_INPUT_NODES; b++) {
-            Connection* connection = new Connection;
-            connection->weight = Random::Float(weight_min, weight_max);
-            connection->node0 = input_nodes[b];
-            connection->node1 = hidden_node;
-
-            hidden_layer_1->connections.emplace_back(connection);
-        }
-    }
-
-    AddLayer(hidden_layer_1);
-
-    std::array<Node*, HIDDEN_LAYER_2_SIZE> l2_hidden_nodes;
-
-    Layer* hidden_layer_2 = new Layer;
-
-    for (int b = 0; b < HIDDEN_LAYER_2_SIZE; b++) {
-        Node* hidden_node = new Node;
-
-        hidden_nodes[hidden_index++] = hidden_node;
-        hidden_layer_2->nodes.emplace_back(hidden_node);
-        l2_hidden_nodes[b] = hidden_node;
-
-        // connect with every hidden node in the previous layer
-        for (int c = 0; c < HIDDEN_LAYER_1_SIZE; c++) {
-            Connection* connection = new Connection;
-            connection->weight = Random::Float(weight_min, weight_max);
-            connection->node0 = l1_hidden_nodes[c];
-            connection->node1 = hidden_node;
-
-            hidden_layer_2->connections.emplace_back(connection);
-        }
-    }
-
-    AddLayer(hidden_layer_2);
-
-    Layer* output_layer = new Layer;
-
-    for (int a = 0; a < N_OUTPUT_NODES; a++) {
-        Node* output_node = new Node;
-
-        output_nodes[a] = output_node;
-        output_layer->nodes.emplace_back(output_node);
-
-        for (int b = 0; b < HIDDEN_LAYER_2_SIZE; b++) {
-            Connection* connection = new Connection;
-            connection->weight = Random::Float(weight_min, weight_max);
-            connection->node0 = l2_hidden_nodes[b];
-            connection->node1 = output_node;
-
-            output_layer->connections.emplace_back(connection);
-        }
-    }
-
-    AddLayer(output_layer);
+    h2_biases.rows = HIDDEN_LAYER_2_SIZE;
+    h2_biases.columns = 1;
+    h2_biases.elements.resize(HIDDEN_LAYER_2_SIZE, 0.0f);
 }
 
 NeuralNetwork::~NeuralNetwork() {
-    for (Node* input_node : input_nodes) {
-        delete input_node;
-    }
-
-    for (Node* hidden_node : hidden_nodes) {
-        delete hidden_node;
-    }
-
-    for (Node* output_node : output_nodes) {
-        delete output_node;
-    }
-
-    for (Layer* layer : layers) {
-        for (auto it = layer->connections.begin(); it != layer->connections.end();) {
-            delete *it;
-            it = layer->connections.erase(it);
-        }
-    }
-}
-
-void NeuralNetwork::AddLayer(Layer* layer) {
-    assert(current_layer < N_LAYERS);
     
-    layers[current_layer++] = layer;
-}
-
-void NeuralNetwork::ClearNodes() {
-    for (Node* hidden_node : hidden_nodes) {
-        hidden_node->value = 0;
-    }
-
-    for (Node* output_node : output_nodes) {
-        output_node->value = 0;
-    }
 }
 
 std::array<float, N_OUTPUT_NODES> NeuralNetwork::GetOutputs(const std::array<float, N_INPUT_NODES> inputs) {
-    ClearNodes();
+    // Matrix* input_matrix = new Matrix;
+    // input_matrix->elements.resize(N_INPUT_NODES);
+    // input_matrix->rows = N_INPUT_NODES;
+    // input_matrix->columns = 1;
+
+    Matrix input_matrix;
+    input_matrix.elements.resize(N_INPUT_NODES);
+    input_matrix.rows = N_INPUT_NODES;
+    input_matrix.columns = 1;
 
     for (int i = 0; i < N_INPUT_NODES; i++) {
-        float input = inputs[i] / 255;
-        input_nodes[i]->value = input;
+        float input = inputs[i] / 25;
+        input_matrix.elements[i] = input;
     }
 
-    for (int i = 0; i < N_LAYERS; i++) {
-        Layer* layer = layers.at(i);
-        bool hidden_layer = i < (N_LAYERS - 1);
+    // Matrix* h1_nodes = Utility::MatrixMultiply(&h1_weights, input_matrix);
+    Matrix h1_nodes = h1_weights * input_matrix + h1_biases;
 
-        for (Connection* connection : layer->connections) {
-            connection->node1->value += connection->node0->value * connection->weight;
-        }
+    for (int i = 0; i < HIDDEN_LAYER_1_SIZE; i++) {
+        // assert(i < h1_nodes->elements.size());
 
-        for (Node* node : layer->nodes) {
-            node->value += node->bias;
-            
-            if (hidden_layer) {
-                node->value = Utility::Activation::ReLU(node->value);
-            }
-        }
+        // h1_nodes->elements[i] = Utility::Activation::ReLU(h1_nodes->elements[i]);
+
+        assert(i < h1_nodes.elements.size());
+
+        h1_nodes.elements[i] = Utility::Activation::ReLU(h1_nodes.elements[i]);
     }
+
+    // Matrix* h2_nodes = Utility::MatrixMultiply(&h2_weights, h1_nodes);
+    Matrix h2_nodes = h2_weights * h1_nodes + h2_biases;
+
+    for (int i = 0; i < HIDDEN_LAYER_2_SIZE; i++) {
+        // assert(i < h2_nodes->elements.size());
+        
+        // h2_nodes->elements[i] = Utility::Activation::ReLU(h2_nodes->elements[i]);
+
+        assert(i < h2_nodes.elements.size());
+        
+        h2_nodes.elements[i] = Utility::Activation::ReLU(h2_nodes.elements[i]);
+    }
+
+    // Matrix* out_nodes = Utility::MatrixMultiply(&out_weights, h2_nodes);
+    Matrix out_nodes = out_weights * h2_nodes;
 
     std::array<float, N_OUTPUT_NODES> outputs;
+    std::array<float, N_OUTPUT_NODES> probabilities;
     float sum = 0.0f;
 
     // softmax
     for (int i = 0; i < N_OUTPUT_NODES; i++) {
-        outputs[i] = output_nodes[i]->value;
+        //outputs[i] = out_nodes->elements[i];
+        outputs[i] = out_nodes.elements[i];
         sum += std::exp(outputs[i]);
     }
 
     sum = std::fmax(sum, 1e-15f);
 
-    // return outputs as probabilities
-    std::array<float, N_OUTPUT_NODES> confidences;
-
     for (int i = 0; i < N_OUTPUT_NODES; i++) {
-        confidences[i] = std::exp(outputs[i]) / sum;
+        probabilities[i] = std::exp(outputs[i]) / sum;
     }
 
-    return confidences;
+    // delete input_matrix;
+    // delete h1_nodes;
+    // delete out_nodes;
+
+    return probabilities;
 }
-
-// std::array<float, N_OUTPUT_NODES> NeuralNetwork::GetConfidences(const std::array<float, N_OUTPUT_NODES> outputs) {
-//     std::array<float, N_OUTPUT_NODES> confidences;
-
-//     float sum = 0;
-
-//     for (float output : outputs) {
-//         sum += std::exp(output);
-//     }
-
-//     for (int i = 0; i < N_OUTPUT_NODES; i++) {
-//         confidences[i] = std::exp(outputs[i]) / sum;
-//     }
-
-//     return confidences;
-// }
