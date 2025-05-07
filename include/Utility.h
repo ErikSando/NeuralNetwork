@@ -14,16 +14,12 @@ namespace Random {
 }
 
 namespace Utility {
-    void InitNodeCounts();
-
     std::string ReadLine(const int line, const std::string& filepath);
     std::string ReadFile(const std::string& filepath);
     std::array<float, N_OUTPUT_NODES> GetTrueOutputs(int digit);
 
-    Matrix* MatrixMultiply(Matrix* matrix1, Matrix* matrix2);
     std::vector<float> RandomMatrixElements(int size, float min, float max);
     void PrintMatrix(Matrix& matrix);
-    void PrintMatrix(Matrix* matrix);
 
     namespace Activation {
         float Sigmoid(float z);

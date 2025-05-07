@@ -9,11 +9,6 @@
 
 const float epsilon = 1e-15f;
 
-template<typename T>
-T Clamp(T value, T min, T max) {
-    return std::min(std::max(value, min), max);
-}
-
 namespace Random {
     void Init() {
         std::srand(time(nullptr));
@@ -29,18 +24,6 @@ namespace Random {
 }
 
 namespace Utility {
-    // void InitNodeCounts() {
-    //     int starting_amount = 128;
-    //     int nhn = 0;
-
-    //     for (int i = 0; i < N_HIDDEN_LAYERS; i++) {
-    //         N_NODES[i] = starting_amount / (i + 1);
-    //         nhn += N_NODES[i];
-    //     }
-
-    //     N_HIDDEN_NODES = nhn;
-    // }
-
     std::string ReadLine(const int line, const std::string& filepath) {
         std::ifstream input(filepath);
     
