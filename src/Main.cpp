@@ -9,7 +9,7 @@
 int main() {
     Random::Init();
 
-    //StartConsoleLoop();
+    StartConsoleLoop();
 
     // Matrix matrix1;
     // Matrix matrix2;
@@ -31,40 +31,40 @@ int main() {
 
     // Utility::PrintMatrix(r);
 
-    NeuralNetwork network;
+    // NeuralNetwork network;
 
-    ImageData* data = DataParser::ParseInputFile(3, "./data/three");
+    // ImageData* data = DataParser::ParseInputFile(3, "./data/three");
 
-    std::array<float, N_OUTPUT_NODES> outputs = network.GetOutputs(data->pixels);
+    // std::array<float, N_OUTPUT_NODES> outputs = network.GetOutputs(data->pixels);
 
-    // repeated code, TODO: prevent repeating
-    float largest = 0;
-    int l_digit = -1;
+    // // repeated code, TODO: prevent repeating
+    // float largest = 0;
+    // int l_digit = -1;
 
-    for (int i = 0; i < N_OUTPUT_NODES; i++) {
-        std::cout << i << ": " << outputs[i] << std::endl;
+    // for (int i = 0; i < N_OUTPUT_NODES; i++) {
+    //     std::cout << i << ": " << outputs[i] << std::endl;
 
-        if (outputs[i] > largest) {
-            largest = outputs[i];
-            l_digit = i;
-        }
-    }
+    //     if (outputs[i] > largest) {
+    //         largest = outputs[i];
+    //         l_digit = i;
+    //     }
+    // }
 
-    std::cout << "Identified digit: " << l_digit << " (" << largest << " probability)" << std::endl;
+    // std::cout << "Identified digit: " << l_digit << " (" << largest << " probability)" << std::endl;
 
-    std::array<float, N_OUTPUT_NODES> true_outputs = Utility::GetTrueOutputs(data->digit);
+    // std::array<float, N_OUTPUT_NODES> true_outputs = Utility::GetTrueOutputs(data->digit);
 
-    #ifndef NDEBUG
+    // #ifndef NDEBUG
 
-    for (int i = 0; i < 10; i++) {
-        float expected = (i == data->digit) ? 1.0f : 0.0f;
-        assert(true_outputs[i] == expected);
-    }
+    // for (int i = 0; i < 10; i++) {
+    //     float expected = (i == data->digit) ? 1.0f : 0.0f;
+    //     assert(true_outputs[i] == expected);
+    // }
 
-    #endif
+    // #endif
 
-    float loss = Utility::Loss::CategoricalCrossEntropy(true_outputs, outputs);
-    std::cout << "CCE Loss: " << loss << " (lower means more accurate)" << std::endl;
+    // float loss = Utility::Loss::CategoricalCrossEntropy(true_outputs, outputs);
+    // std::cout << "CCE Loss: " << loss << " (lower means more accurate)" << std::endl;
 
     // Matrix m1{ .rows = 2, .columns = 3 };
     // Matrix m2{ .rows = 3, .columns = 2 };

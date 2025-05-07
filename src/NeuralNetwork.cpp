@@ -5,7 +5,8 @@
 #include <Utility.h>
 
 NeuralNetwork::NeuralNetwork() {
-    float weight_max = std::sqrt(6 / (N_INPUT_NODES + N_OUTPUT_NODES));
+    //float weight_max = std::sqrt(6 / (N_INPUT_NODES + N_OUTPUT_NODES));
+    float weight_max = std::sqrt(2 / N_INPUT_NODES);
     float weight_min = -weight_max;
 
     h1_weights.rows = HIDDEN_LAYER_1_SIZE;
@@ -33,56 +34,50 @@ NeuralNetwork::NeuralNetwork() {
     h2_biases.rows = HIDDEN_LAYER_2_SIZE;
     h2_biases.columns = 1;
     h2_biases.elements.resize(HIDDEN_LAYER_2_SIZE, 0.0f);
+
+    out_biases.rows = N_OUTPUT_NODES;
+    out_biases.columns = 1;
+    out_biases.elements.resize(N_OUTPUT_NODES, 0.0f);
 }
 
 NeuralNetwork::~NeuralNetwork() {
-    
+    // don't need this anymore, now that I'm not using heap allocated pointers
 }
 
-std::array<float, N_OUTPUT_NODES> NeuralNetwork::GetOutputs(const std::array<float, N_INPUT_NODES> inputs) {
-    // Matrix* input_matrix = new Matrix;
-    // input_matrix->elements.resize(N_INPUT_NODES);
-    // input_matrix->rows = N_INPUT_NODES;
-    // input_matrix->columns = 1;
+// std::array<float, N_INPUT_NODES> NeuralNetwork::NormaliseInputs(const std::array<float, N_INPUT_NODES> inputs) {
+//     std::array<float, N_INPUT_NODES> n_inputs;
 
-    Matrix input_matrix;
+//     for (int i = 0; i < N_INPUT_NODES; i++) {
+//         n_inputs[i] = inputs[i] / 255;
+//     }
+
+//     return n_inputs;
+// }
+
+std::array<float, N_OUTPUT_NODES> NeuralNetwork::GetOutputs(const std::array<float, N_INPUT_NODES> inputs) {
+    Matrix input_matrix{ .rows = N_INPUT_NODES, .columns = 1 };
     input_matrix.elements.resize(N_INPUT_NODES);
-    input_matrix.rows = N_INPUT_NODES;
-    input_matrix.columns = 1;
 
     for (int i = 0; i < N_INPUT_NODES; i++) {
-        float input = inputs[i] / 25;
+        float input = inputs[i] / 255;
         input_matrix.elements[i] = input;
     }
 
-    // Matrix* h1_nodes = Utility::MatrixMultiply(&h1_weights, input_matrix);
-    Matrix h1_nodes = h1_weights * input_matrix + h1_biases;
+    h1_nodes = h1_weights * input_matrix + h1_biases;
 
     for (int i = 0; i < HIDDEN_LAYER_1_SIZE; i++) {
-        // assert(i < h1_nodes->elements.size());
-
-        // h1_nodes->elements[i] = Utility::Activation::ReLU(h1_nodes->elements[i]);
-
         assert(i < h1_nodes.elements.size());
-
-        h1_nodes.elements[i] = Utility::Activation::ReLU(h1_nodes.elements[i]);
+        h1_nodes.elements[i] = Utility::Activation::LeakyReLU(h1_nodes.elements[i]);
     }
 
-    // Matrix* h2_nodes = Utility::MatrixMultiply(&h2_weights, h1_nodes);
-    Matrix h2_nodes = h2_weights * h1_nodes + h2_biases;
+    h2_nodes = h2_weights * h1_nodes + h2_biases;
 
     for (int i = 0; i < HIDDEN_LAYER_2_SIZE; i++) {
-        // assert(i < h2_nodes->elements.size());
-        
-        // h2_nodes->elements[i] = Utility::Activation::ReLU(h2_nodes->elements[i]);
-
         assert(i < h2_nodes.elements.size());
-        
-        h2_nodes.elements[i] = Utility::Activation::ReLU(h2_nodes.elements[i]);
+        h2_nodes.elements[i] = Utility::Activation::LeakyReLU(h2_nodes.elements[i]);
     }
 
-    // Matrix* out_nodes = Utility::MatrixMultiply(&out_weights, h2_nodes);
-    Matrix out_nodes = out_weights * h2_nodes;
+    out_nodes = out_weights * h2_nodes + out_biases;
 
     std::array<float, N_OUTPUT_NODES> outputs;
     std::array<float, N_OUTPUT_NODES> probabilities;
@@ -90,7 +85,6 @@ std::array<float, N_OUTPUT_NODES> NeuralNetwork::GetOutputs(const std::array<flo
 
     // softmax
     for (int i = 0; i < N_OUTPUT_NODES; i++) {
-        //outputs[i] = out_nodes->elements[i];
         outputs[i] = out_nodes.elements[i];
         sum += std::exp(outputs[i]);
     }
@@ -100,10 +94,6 @@ std::array<float, N_OUTPUT_NODES> NeuralNetwork::GetOutputs(const std::array<flo
     for (int i = 0; i < N_OUTPUT_NODES; i++) {
         probabilities[i] = std::exp(outputs[i]) / sum;
     }
-
-    // delete input_matrix;
-    // delete h1_nodes;
-    // delete out_nodes;
 
     return probabilities;
 }

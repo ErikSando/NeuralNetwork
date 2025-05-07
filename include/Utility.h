@@ -24,6 +24,7 @@ namespace Utility {
     namespace Activation {
         float Sigmoid(float z);
         float ReLU(float z);
+        float LeakyReLU(float z);
         float Tanh(float z);
     }
     

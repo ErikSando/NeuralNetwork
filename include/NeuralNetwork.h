@@ -7,22 +7,6 @@
 #include <Globals.h>
 #include <Matrix.h>
 
-struct Node {
-    float value = 0;
-    float bias = 0;
-};
-
-struct Connection {
-    float weight;
-    Node* node0;
-    Node* node1;
-};
-
-struct Layer {
-    std::vector<Connection*> connections;
-    std::vector<Node*> nodes;
-};
-
 struct TestingData {
     int correct = 0;
     int incorrect = 0;
@@ -34,6 +18,7 @@ class NeuralNetwork {
     NeuralNetwork();
     ~NeuralNetwork();
 
+    //std::array<float, N_INPUT_NODES> NormaliseInputs(const std::array<float, N_INPUT_NODES> inputs);
     std::array<float, N_OUTPUT_NODES> GetOutputs(const std::array<float, N_INPUT_NODES> inputs);
     
     //static std::array<float, N_OUTPUT_NODES> GetConfidences(const std::array<float, N_OUTPUT_NODES> outputs);
@@ -55,8 +40,13 @@ class NeuralNetwork {
 
     Matrix h1_biases;
     Matrix h2_biases;
+    Matrix out_biases;
 
-    float learning_rate = 0.001;
+    Matrix h1_nodes;
+    Matrix h2_nodes;
+    Matrix out_nodes;
+
+    float learning_rate = 0.01;
     int batch_size = 32;
     int current_row = 1; // current row in the training data
     int c_training_row = 1; // current row in the testing data

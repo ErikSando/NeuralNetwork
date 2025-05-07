@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 
 #include <DataParser.h>
 #include <NeuralNetwork.h>
@@ -15,7 +16,135 @@ void NeuralNetwork::SetBatchSize(const int bs) {
 void NeuralNetwork::Train(const int iterations, const std::string& trainpath, const bool newpath) {
     if (newpath) current_row = 1;
 
-    for (int i = 0; i < iterations; i++) {
-        ImageData* data = DataParser::GetRowImageData(current_row, trainpath);
+    int _iterations = std::floor(iterations / batch_size);
+
+    // u need to do some weird stuff in order to speed up training with batches
+    // google the maths behind it or something
+
+    for (int _ = 0; _ < _iterations; _++) {
+        std::array<float, N_OUTPUT_NODES * HIDDEN_LAYER_2_SIZE> cumulative_out_weight_gradients{};
+        std::array<float, HIDDEN_LAYER_2_SIZE * HIDDEN_LAYER_1_SIZE> cumulative_h2_weight_gradients{};
+        std::array<float, HIDDEN_LAYER_1_SIZE * N_INPUT_NODES> cumulative_h1_weight_gradients{};
+
+        std::array<float, N_OUTPUT_NODES> cumulative_out_bias_gradients{};
+        std::array<float, HIDDEN_LAYER_2_SIZE> cumulative_h2_bias_gradients{};
+        std::array<float, HIDDEN_LAYER_1_SIZE> cumulative_h1_bias_gradients{};
+
+        for (int b = 0; b < batch_size; b++) {
+            ImageData* data = DataParser::GetRowImageData(current_row, trainpath);
+
+            std::array<float, N_OUTPUT_NODES> outputs = GetOutputs(data->pixels);
+            std::array<float, N_OUTPUT_NODES> targets = Utility::GetTrueOutputs(data->digit);
+
+            std::array<float, N_INPUT_NODES> inputs = data->pixels;
+
+            delete data;
+
+            current_row = (current_row % TRAINING_ROWS) + 1;
+            assert(current_row <= TRAINING_ROWS);
+
+            std::array<float, N_OUTPUT_NODES> output_deltas;
+
+            for (int j = 0; j < N_OUTPUT_NODES; j++) {
+                output_deltas[j] = outputs[j] - targets[j];
+            }
+
+            std::vector<float> h2_deltas(HIDDEN_LAYER_2_SIZE);
+            std::vector<float> h1_deltas(HIDDEN_LAYER_1_SIZE);
+
+            for (int i = 0; i < HIDDEN_LAYER_2_SIZE; i++) {
+                float activation_derivative = h2_nodes.elements[i] > 0 ? 1.0f : 0.0f;
+
+                if (activation_derivative == 0.0f) {
+                    h2_deltas[i] = 0.0f;
+                    continue;
+                }
+
+                float delta_sum = 0.0f;
+
+                for (int j = 0; j < N_OUTPUT_NODES; j++) {
+                    delta_sum += output_deltas[j] * out_weights.elements[i + j * HIDDEN_LAYER_2_SIZE];
+                }
+
+                h2_deltas[i] += delta_sum * activation_derivative;
+            }
+
+            for (int i = 0; i < HIDDEN_LAYER_1_SIZE; i++) {
+                float activation_derivative = h1_nodes.elements[i] > 0 ? 1.0f : 0.01f;
+
+                // if (activation_derivative == 0.0f) {
+                //     h1_deltas[i] = 0.0f;
+                //     continue;
+                // }
+
+                float delta_sum = 0.0f;
+
+                for (int j = 0; j < HIDDEN_LAYER_2_SIZE; j++) {
+                    delta_sum += h2_deltas[j] * h2_weights.elements[i + j * HIDDEN_LAYER_1_SIZE];
+                }
+
+                h1_deltas[i] += delta_sum * activation_derivative;
+            }
+
+            for (int i = 0; i < N_OUTPUT_NODES; i++) {
+                float delta = std::clamp(output_deltas[i], -1.0f, 1.0f);
+
+                for (int j = 0; j < HIDDEN_LAYER_2_SIZE; j++) {
+                    //out_weights.elements[j + i * HIDDEN_LAYER_2_SIZE] -= learning_rate * (delta * h2_nodes.elements[j] + reg_str * out_weights.elements[j + i * HIDDEN_LAYER_2_SIZE]);
+                    cumulative_out_weight_gradients[j + i * HIDDEN_LAYER_2_SIZE] -= learning_rate * (delta * h2_nodes.elements[j] + reg_str * out_weights.elements[j + i * HIDDEN_LAYER_2_SIZE]);
+                }
+
+                //out_biases.elements[i] -= learning_rate * delta;
+                cumulative_out_bias_gradients[i] -= learning_rate * delta;
+            }
+
+            for (int i = 0; i < HIDDEN_LAYER_2_SIZE; i++) {
+                float delta = std::clamp(h2_deltas[i], -1.0f, 1.0f);
+
+                for (int j = 0; j < HIDDEN_LAYER_1_SIZE; j++) {
+                    //h2_weights.elements[j + i * HIDDEN_LAYER_1_SIZE] -= learning_rate * (delta * h1_nodes.elements[j] + reg_str * h2_weights.elements[j + i * HIDDEN_LAYER_1_SIZE]);
+                    cumulative_h2_weight_gradients[j + i * HIDDEN_LAYER_1_SIZE] -= learning_rate * (delta * h1_nodes.elements[j] + reg_str * h2_weights.elements[j + i * HIDDEN_LAYER_1_SIZE]);
+                }
+
+                //h2_biases.elements[i] -= learning_rate * delta;
+                cumulative_h2_bias_gradients[i] -= learning_rate * delta;
+            }
+
+            for (int i = 0; i < HIDDEN_LAYER_1_SIZE; i++) {
+                float delta = std::clamp(h1_deltas[i], -1.0f, 1.0f);
+
+                for (int j = 0; j < N_INPUT_NODES; j++) {
+                    //h1_weights.elements[j + i * N_INPUT_NODES] -= learning_rate * (delta * inputs[j] / 255 + reg_str * h1_weights.elements[j + i * N_INPUT_NODES]);
+                    cumulative_h1_weight_gradients[j + i * N_INPUT_NODES] -= learning_rate * (delta * inputs[j] / 255 + reg_str * h1_weights.elements[j + i * N_INPUT_NODES]);
+                }
+
+                //h1_biases.elements[i] -= learning_rate * delta;
+                cumulative_h1_bias_gradients[i] -= learning_rate * delta;
+            }
+        }
+
+        for (int i = 0; i < N_OUTPUT_NODES; i++) {
+            for (int j = 0; j < HIDDEN_LAYER_2_SIZE; j++) {
+                out_weights.elements[j + i * HIDDEN_LAYER_2_SIZE] -= cumulative_out_weight_gradients[j + i * HIDDEN_LAYER_2_SIZE];
+            }
+
+            out_biases.elements[i] -= cumulative_out_bias_gradients[i];
+        }
+
+        for (int i = 0; i < HIDDEN_LAYER_2_SIZE; i++) {
+            for (int j = 0; j < HIDDEN_LAYER_1_SIZE; j++) {
+                h2_weights.elements[j + i * HIDDEN_LAYER_1_SIZE] -= cumulative_h2_weight_gradients[j + i * HIDDEN_LAYER_1_SIZE];
+            }
+
+            h2_biases.elements[i] -= cumulative_h2_bias_gradients[i];
+        }
+
+        for (int i = 0; i < HIDDEN_LAYER_1_SIZE; i++) {
+            for (int j = 0; j < N_INPUT_NODES; j++) {
+                h1_weights.elements[j + i * N_INPUT_NODES] -= cumulative_h1_weight_gradients[j + i * N_INPUT_NODES];
+            }
+
+            h1_biases.elements[i] -= cumulative_h1_bias_gradients[i];
+        }
     }
 }

@@ -83,6 +83,10 @@ namespace Utility {
             return std::fmax(0.0f, z);
         }
 
+        float LeakyReLU(float z) {
+            if (z > 0) return z;
+            else return 0.01 * z;
+        }
 
         float Tanh(float z) {
             return (std::exp(z) - std::exp(-z)) / (std::exp(z) + std::exp(-z));
