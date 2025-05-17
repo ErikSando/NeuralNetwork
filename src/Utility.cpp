@@ -15,11 +15,11 @@ namespace Random {
     }
     
     float Float() {
-        return static_cast<float> (std::rand()) / static_cast<float> (RAND_MAX);
+        return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
     }
 
     float Float(float min, float max) {
-        return static_cast<float> (std::rand()) / static_cast<float> (RAND_MAX) * (max - min) + min;
+        return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (max - min) + min;
     }
 }
 
@@ -27,42 +27,40 @@ namespace Utility {
     std::string ReadLine(const int line, const std::string& filepath) {
         std::ifstream input(filepath);
 
-        if (input.is_open()) {
-            std::string line_string;
-    
-            int current_line = 1;
-    
-            while (std::getline(input, line_string)) {
-                if (current_line == line) {
-                    return line_string;
-                }
-    
-                current_line++;
-            }
-    
-            throw std::out_of_range("Requested line number out of range");
-        }
-        else {
+        if (!input.is_open()) {
             std::cerr << "Failed to open file: " << filepath << std::endl;
             return "";
         }
+
+        std::string line_string;
+
+        int current_line = 1;
+
+        while (std::getline(input, line_string)) {
+            if (current_line == line) {
+                return line_string;
+            }
+
+            current_line++;
+        }
+
+        throw std::out_of_range("Requested line number out of range");
     }
 
     std::string ReadFile(const std::string& filepath) {
         std::ifstream input(filepath);
     
-        if (input.is_open()) {
-            std::stringstream contents;
-    
-            contents << input.rdbuf();
-            input.close();
-    
-            return contents.str();
-        }
-        else {
+        if (!input.is_open()) {
             std::cerr << "Failed to open file: " << filepath << std::endl;
             return "";
         }
+
+        std::stringstream contents;
+
+        contents << input.rdbuf();
+        input.close();
+
+        return contents.str();
     }
 
     std::array<uint8_t, N_OUTPUT_NODES> GetTrueOutputs(int digit) {

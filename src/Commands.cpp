@@ -41,7 +41,7 @@ void StartConsoleLoop() {
             std::cout << "bs [batch size]:\n- Set the batch size of the model. Default value is 32. Small values will significantly limit training speed." << std::endl;
             std::cout << "lr [learning rate]:\n- Set the learning rate of the model. Default value is 0.001. Large values may break the model." << std::endl;
             std::cout << "save [save path]\n- Save model data to the specified save file." << std::endl;
-            std::cout << "upload [save path]:\n- (currently not working correctly) Upload model data from the specified save file." << std::endl;
+            std::cout << "load [save path]:\n- (currently not working correctly) Load model data from the specified save file." << std::endl;
             std::cout << "id [image data path] [optional: correct digit]\n- Identify a digit in the data provided. If the correct digit is provided, a loss value will be printed." << std::endl;
             std::cout << "read [no. lines] [optional: path]\n- Test the time taken to read the specified number of lines from a file, and convert into input data. If no path is given, the default training CSV will be used." << std::endl;
         }
@@ -54,11 +54,11 @@ void StartConsoleLoop() {
 
             std::string savepath = args.at(1);
 
-            network.SaveModel(savepath);
-
-            std::cout << "Saved model data to " << savepath << std::endl;
+            if (network.SaveModel(savepath)) {
+                std::cout << "Saved model data to " << savepath << std::endl;
+            }
         }
-        else if (cmd == "upload") {
+        else if (cmd == "load") {
             if (args.size() < 2) {
                 std::cout << "Insufficient arguments" << std::endl;
                 std::cout << "Usage: upload [save path]" << std::endl;

@@ -6,7 +6,7 @@
 
 NeuralNetwork::NeuralNetwork() {
     //float weight_max = std::sqrt(6 / (N_INPUT_NODES + N_OUTPUT_NODES));
-    float weight_max = std::sqrt(2 / N_INPUT_NODES);
+    float weight_max = std::sqrt(2.0f / static_cast<float>(N_INPUT_NODES));
     float weight_min = -weight_max;
 
     h1_weights.rows = HIDDEN_LAYER_1_SIZE;
