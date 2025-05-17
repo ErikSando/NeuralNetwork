@@ -1,11 +1,12 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
 
-#include <Globals.h>
-#include <Matrix.h>
+#include "Globals.h"
+#include "Matrix.h"
 
 namespace Random {
     void Init();
@@ -16,7 +17,7 @@ namespace Random {
 namespace Utility {
     std::string ReadLine(const int line, const std::string& filepath);
     std::string ReadFile(const std::string& filepath);
-    std::array<float, N_OUTPUT_NODES> GetTrueOutputs(int digit);
+    std::array<uint8_t, N_OUTPUT_NODES> GetTrueOutputs(int digit);
 
     std::vector<float> RandomMatrixElements(int size, float min, float max);
     void PrintMatrix(Matrix& matrix);
@@ -29,7 +30,7 @@ namespace Utility {
     }
     
     namespace Loss {
-        float CategoricalCrossEntropy(std::array<float, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs);
-        float MeanSquaredError(std::array<float, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs);
+        float CategoricalCrossEntropy(std::array<uint8_t, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs);
+        float MeanSquaredError(std::array<uint8_t, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs);
     }
 }

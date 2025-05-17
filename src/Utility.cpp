@@ -26,7 +26,7 @@ namespace Random {
 namespace Utility {
     std::string ReadLine(const int line, const std::string& filepath) {
         std::ifstream input(filepath);
-    
+
         if (input.is_open()) {
             std::string line_string;
     
@@ -65,11 +65,11 @@ namespace Utility {
         }
     }
 
-    std::array<float, N_OUTPUT_NODES> GetTrueOutputs(int digit) {
+    std::array<uint8_t, N_OUTPUT_NODES> GetTrueOutputs(int digit) {
         assert(digit >= 0 && digit < N_OUTPUT_NODES);
 
-        std::array<float, N_OUTPUT_NODES> true_outputs{};
-        true_outputs[digit] = 1.0f;
+        std::array<uint8_t, N_OUTPUT_NODES> true_outputs{};
+        true_outputs[digit] = 1;
 
         return true_outputs;
     }
@@ -94,19 +94,19 @@ namespace Utility {
     }
 
     namespace Loss {
-        float CategoricalCrossEntropy(std::array<float, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs) {
+        float CategoricalCrossEntropy(std::array<uint8_t, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs) {
             float loss = 0.0f;
             
             for (int i = 0; i < N_OUTPUT_NODES; i++) {
                 float y = softmax_outputs[i];
                 if (y == 0.0f) y = epsilon;
-                loss += true_outputs[i] * -std::log(y);
+                loss += static_cast<float>(true_outputs[i]) * -std::log(y);
             }
 
             return loss;
         }
 
-        float MeanSquaredError(std::array<float, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs) {
+        float MeanSquaredError(std::array<uint8_t, N_OUTPUT_NODES> true_outputs, std::array<float, N_OUTPUT_NODES> softmax_outputs) {
             float mse = 0.0f;
 
             for (int i = 0; i < N_OUTPUT_NODES; i++) {

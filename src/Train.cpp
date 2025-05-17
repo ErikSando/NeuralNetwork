@@ -18,9 +18,6 @@ void NeuralNetwork::Train(const int iterations, const std::string& trainpath, co
 
     int _iterations = std::floor(iterations / batch_size);
 
-    // u need to do some weird stuff in order to speed up training with batches
-    // google the maths behind it or something
-
     for (int _ = 0; _ < _iterations; _++) {
         std::array<float, N_OUTPUT_NODES * HIDDEN_LAYER_2_SIZE> cumulative_out_weight_gradients{};
         std::array<float, HIDDEN_LAYER_2_SIZE * HIDDEN_LAYER_1_SIZE> cumulative_h2_weight_gradients{};
@@ -30,13 +27,15 @@ void NeuralNetwork::Train(const int iterations, const std::string& trainpath, co
         std::array<float, HIDDEN_LAYER_2_SIZE> cumulative_h2_bias_gradients{};
         std::array<float, HIDDEN_LAYER_1_SIZE> cumulative_h1_bias_gradients{};
 
+        std::vector<ImageData*> image_data = DataParser::GetRowsImageData(current_row, batch_size, trainpath);
+
         for (int b = 0; b < batch_size; b++) {
-            ImageData* data = DataParser::GetRowImageData(current_row, trainpath);
+            ImageData* data = image_data[b];
 
             std::array<float, N_OUTPUT_NODES> outputs = GetOutputs(data->pixels);
-            std::array<float, N_OUTPUT_NODES> targets = Utility::GetTrueOutputs(data->digit);
+            std::array<uint8_t, N_OUTPUT_NODES> targets = Utility::GetTrueOutputs(data->digit);
 
-            std::array<float, N_INPUT_NODES> inputs = data->pixels;
+            std::array<uint8_t, N_INPUT_NODES> inputs = data->pixels;
 
             delete data;
 
@@ -46,7 +45,7 @@ void NeuralNetwork::Train(const int iterations, const std::string& trainpath, co
             std::array<float, N_OUTPUT_NODES> output_deltas;
 
             for (int j = 0; j < N_OUTPUT_NODES; j++) {
-                output_deltas[j] = outputs[j] - targets[j];
+                output_deltas[j] = outputs[j] - static_cast<float>(targets[j]);
             }
 
             std::vector<float> h2_deltas(HIDDEN_LAYER_2_SIZE);

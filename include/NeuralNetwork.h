@@ -1,11 +1,12 @@
 #pragma once
 
-#include <iostream>
 #include <array>
+#include <cstdint>
+#include <iostream>
 #include <vector>
 
-#include <Globals.h>
-#include <Matrix.h>
+#include "Globals.h"
+#include "Matrix.h"
 
 struct TestingData {
     int correct = 0;
@@ -18,10 +19,7 @@ class NeuralNetwork {
     NeuralNetwork();
     ~NeuralNetwork();
 
-    //std::array<float, N_INPUT_NODES> NormaliseInputs(const std::array<float, N_INPUT_NODES> inputs);
-    std::array<float, N_OUTPUT_NODES> GetOutputs(const std::array<float, N_INPUT_NODES> inputs);
-    
-    //static std::array<float, N_OUTPUT_NODES> GetConfidences(const std::array<float, N_OUTPUT_NODES> outputs);
+    std::array<float, N_OUTPUT_NODES> GetOutputs(const std::array<uint8_t, N_INPUT_NODES> inputs, int n_batches = -1);
 
     void Train(const int iterations, const std::string& trainpath, const bool newpath = false);
     void SetLearningRate(const float lr);
@@ -30,7 +28,7 @@ class NeuralNetwork {
     TestingData* Test(const int iterations, const std::string& trainpath, const bool newpath = false);
 
     bool SaveModel(const std::string& savepath);
-    void UploadModel(const std::string& savepath);
+    void LoadModel(const std::string& savepath);
 
     private:
 
@@ -49,6 +47,6 @@ class NeuralNetwork {
     float learning_rate = 0.01;
     int batch_size = 32;
     int current_row = 1; // current row in the training data
-    int c_training_row = 1; // current row in the testing data
+    int c_testing_row = 1; // current row in the testing data
     int reg_str = 0.0001; // regularisation strength, denoted lambda i believe
 };

@@ -5,20 +5,18 @@
 // Testing time increases with each test (for the same number of iterations)
 
 TestingData* NeuralNetwork::Test(const int iterations, const std::string& testpath, const bool newpath) {
-    if (newpath) c_training_row = 1;
+    if (newpath) c_testing_row = 1;
 
     TestingData* t_data = new TestingData;
 
-    int correct = 0;
-    int incorret = 0;
-
     for (int i = 0; i < iterations; i++) {
-        ImageData* data = DataParser::GetRowImageData(c_training_row, testpath);
+        std::vector<ImageData*> image_data = DataParser::GetRowsImageData(c_testing_row, 1, testpath);
+        ImageData* data = image_data[0];
 
         std::array<float, N_OUTPUT_NODES> outputs = GetOutputs(data->pixels);
 
-        c_training_row = (c_training_row % TESTING_ROWS) + 1;
-        assert(c_training_row <= TESTING_ROWS);
+        c_testing_row = (c_testing_row % TESTING_ROWS) + 1;
+        assert(c_testing_row <= TESTING_ROWS);
 
         // repeated code, TODO: prevent repeating
         float largest = 0;
@@ -40,7 +38,11 @@ TestingData* NeuralNetwork::Test(const int iterations, const std::string& testpa
         if (l_digit == data->digit) t_data->correct++;
         else t_data->incorrect++;
 
-        delete data;
+        for (int i = 0; i < image_data.size(); i++) {
+            delete image_data[i];
+        }
+
+        image_data.clear();
     }
 
     return t_data;

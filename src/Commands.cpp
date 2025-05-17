@@ -1,11 +1,11 @@
+#include <chrono>
 #include <iostream>
 #include <sstream>
-#include <chrono>
 
-#include <Globals.h>
-#include <DataParser.h>
-#include <NeuralNetwork.h>
-#include <Utility.h>
+#include "Globals.h"
+#include "DataParser.h"
+#include "NeuralNetwork.h"
+#include "Utility.h"
 
 void StartConsoleLoop() {
     NeuralNetwork network;
@@ -31,15 +31,19 @@ void StartConsoleLoop() {
         if (cmd == "exit") {
             break;
         }
+        // TODO: make the commands more flexible with which training data is used
+        // Also make a list of networks which the user can add to, to train for different data sets
+        // And finally fix the uplo
         else if (cmd == "help") {
             std::cout << "help:\n- Shows this menu." << std::endl;
-            std::cout << "train [iterations]:\n- Train the model with the number of iterations specified. One iteration uses one image." << std::endl;
-            std::cout << "test [iterations]:\n- Test the model with the number of iterations specified. One iteration uses one image. The accuracy will be printed at the end." << std::endl;
+            std::cout << "train [no. iterations]:\n- Train the model with the number of iterations specified. One iteration uses one image." << std::endl;
+            std::cout << "test [mo. iterations]:\n- Test the model with the number of iterations specified. One iteration uses one image. The accuracy will be printed at the end." << std::endl;
             std::cout << "bs [batch size]:\n- Set the batch size of the model. Default value is 32. Small values will significantly limit training speed." << std::endl;
             std::cout << "lr [learning rate]:\n- Set the learning rate of the model. Default value is 0.001. Large values may break the model." << std::endl;
             std::cout << "save [save path]\n- Save model data to the specified save file." << std::endl;
             std::cout << "upload [save path]:\n- (currently not working correctly) Upload model data from the specified save file." << std::endl;
             std::cout << "id [image data path] [optional: correct digit]\n- Identify a digit in the data provided. If the correct digit is provided, a loss value will be printed." << std::endl;
+            std::cout << "read [no. lines] [optional: path]\n- Test the time taken to read the specified number of lines from a file, and convert into input data. If no path is given, the default training CSV will be used." << std::endl;
         }
         else if (cmd == "save") {
             if (args.size() < 2) {
@@ -63,7 +67,7 @@ void StartConsoleLoop() {
 
             std::string savepath = args.at(1);
 
-            network.UploadModel(savepath);
+            network.LoadModel(savepath);
 
             std::cout << "Uploaded data from " << savepath << std::endl;
         }
@@ -83,7 +87,7 @@ void StartConsoleLoop() {
                 digit = std::stoi(args.at(2));
             }
             
-            ImageData* data = DataParser::ParseInputFile(digit, datapath);
+            const ImageData* data = DataParser::ParseInputFile(digit, datapath);
 
             std::array<float, N_OUTPUT_NODES> outputs = network.GetOutputs(data->pixels);
 
@@ -103,12 +107,12 @@ void StartConsoleLoop() {
             std::cout << "Identified digit: " << l_digit << " (" << largest << " probability)" << std::endl;
 
             if (digit_specified) {
-                std::array<float, N_OUTPUT_NODES> true_outputs = Utility::GetTrueOutputs(digit);
+                std::array<uint8_t, N_OUTPUT_NODES> true_outputs = Utility::GetTrueOutputs(digit);
 
                 #ifndef NDEBUG
 
                 for (int i = 0; i < 10; i++) {
-                    float expected = (i == data->digit) ? 1.0f : 0.0f;
+                    uint8_t expected = (i == data->digit) ? 1 : 0;
                     assert(true_outputs[i] == expected);
                 }
 
@@ -183,6 +187,37 @@ void StartConsoleLoop() {
 
             std::cout << "Correct: " << c << ", incorrect: " << ic << std::endl;
             std::cout << "Accuracy: " << (100 * ((float)c / (float)(c + ic))) << "% (" << c << "/" << (c + ic) << ")" << std::endl;
+        
+            delete t_data;
+        }
+        else if (cmd == "read") {
+            if (args.size() < 2) {
+                std::cout << "Insufficient arguments" << std::endl;
+                std::cout << "Usage: read [no. lines] [optional: path]" << std::endl;
+                continue;
+            }
+
+            int lines = std::stoi(args.at(1));
+            std::string path = "data/mnistdata/mnist_train.csv";
+
+            if (args.size() > 2) {
+                path = args.at(3);
+            }
+
+            auto start = std::chrono::high_resolution_clock::now();
+
+            for (int l = 1; l < lines; l++) {
+                std::vector<ImageData*> data = DataParser::GetRowsImageData(l, 1, path);
+
+                for (int i = 0; i < data.size(); i++) {
+                    delete data[i];
+                }
+            }
+
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        
+            std::cout << "Processed " << lines << " lines in " << duration << " ms." << std::endl;
         }
     }
 }

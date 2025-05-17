@@ -11,9 +11,3 @@ bool NeuralNetwork::SaveModel(const std::string& savepath) {
 
     return false;
 }
-
-void NeuralNetwork::UploadModel(const std::string& savepath) {
-    std::string raw_text = Utility::ReadFile(savepath);
-
-    
-}

@@ -9,5 +9,4 @@ for arg in $@; do
     done
 done
 
-cd src
 make $make_arg
