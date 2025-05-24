@@ -18,6 +18,7 @@ namespace Utility {
     std::string ReadLine(const int line, const std::string& filepath);
     std::string ReadFile(const std::string& filepath);
     std::array<uint8_t, N_OUTPUT_NODES> GetTrueOutputs(int digit);
+    std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE> GetBatchedTrueOutputs(std::array<int, BATCH_SIZE> digits);
 
     std::vector<float> RandomMatrixElements(int size, float min, float max);
     void PrintMatrix(Matrix& matrix);

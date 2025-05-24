@@ -1,0 +1,27 @@
+* gets slower as the line number gets larger
+
+1280:
+
+2811
+3215
+3813
+
+40 (32 batch size):
+
+1724
+2115
+3220
+3540
+
+line reading improvements:
+
+1501
+1503
+1517
+1593
+1513
+1634
+1514
+1523
+1545
+1514

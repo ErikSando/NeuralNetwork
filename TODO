@@ -1,9 +1,6 @@
 IMMEDIATE:
 
-Fix train, test and read command
-- Problem with GetRowsImageData causing segmentation fault
-
-Rewrite save and upload command for the new version
+Fix load command
 
 Progress bars (or any form of progress indicator) for train and test commands
 

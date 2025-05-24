@@ -10,10 +10,14 @@ TestingData* NeuralNetwork::Test(const int iterations, const std::string& testpa
     TestingData* t_data = new TestingData;
 
     for (int i = 0; i < iterations; i++) {
-        std::vector<ImageData*> image_data = DataParser::GetRowsImageData(c_testing_row, 1, testpath);
-        ImageData* data = image_data[0];
+        std::array<uint8_t, N_INPUT_NODES * BATCH_SIZE> inputs;
+        const ImageData* data = DataParser::GetRowData(c_testing_row, testpath);
 
-        std::array<float, N_OUTPUT_NODES> outputs = GetOutputs(data->pixels);
+        for (int i = 0; i < BATCH_SIZE; i++) {
+            std::copy(data->pixels.begin(), data->pixels.end(), inputs.begin() + i * BATCH_SIZE * sizeof(uint8_t));
+        }
+
+        std::array<float, N_OUTPUT_NODES * BATCH_SIZE> outputs = GetOutputs(inputs);
 
         c_testing_row = (c_testing_row % TESTING_ROWS) + 1;
         assert(c_testing_row <= TESTING_ROWS);
@@ -38,11 +42,7 @@ TestingData* NeuralNetwork::Test(const int iterations, const std::string& testpa
         if (l_digit == data->digit) t_data->correct++;
         else t_data->incorrect++;
 
-        for (int i = 0; i < image_data.size(); i++) {
-            delete image_data[i];
-        }
-
-        image_data.clear();
+        delete data;
     }
 
     return t_data;

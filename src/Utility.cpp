@@ -24,6 +24,16 @@ namespace Random {
 }
 
 namespace Utility {
+    // using 32 bit int instead of streampos to save memory, maximum index cannot exceed 32 bits
+    // stored in static memory so the large size doesn't matter
+    static std::array<uint32_t, TRAINING_ROWS> line_offsets;
+
+    static std::string lastpath;
+    //static std::streampos jump = 0;
+    static int last_line = 0;
+    static int largest_line = 1;
+
+    // this seems faster than the other one (tested with train 400, this had 14288ms, the other 16261ms)
     std::string ReadLine(const int line, const std::string& filepath) {
         std::ifstream input(filepath);
 
@@ -32,20 +42,96 @@ namespace Utility {
             return "";
         }
 
-        std::string line_string;
+        if (filepath != lastpath) {
+            last_line = 0;
+            largest_line = 1;
+            lastpath = filepath;
+        }
 
         int current_line = 1;
 
-        while (std::getline(input, line_string)) {
-            if (current_line == line) {
-                return line_string;
-            }
+        if (line <= largest_line) {
+            assert(line >= 1 && line <= TRAINING_ROWS);
 
-            current_line++;
+            current_line = line;
+            std::streampos jump = static_cast<std::streampos>(line_offsets[line - 1]);
+            input.seekg(jump);
+        }
+        else {
+            assert(largest_line >= 1 && largest_line <= TRAINING_ROWS);
+
+            current_line = largest_line;
+            std::streampos jump = static_cast<std::streampos>(line_offsets[current_line - 1]);
+            input.seekg(jump);
         }
 
-        throw std::out_of_range("Requested line number out of range");
+        std::string line_string;
+
+        for (; current_line <= line; current_line++) {
+            if (!std::getline(input, line_string)) {
+                throw std::out_of_range("Requested line number out of range");
+            }
+
+            std::streampos pos = input.tellg();
+
+            if (pos != EOF) {
+                //jump = pos;
+                line_offsets[current_line] = static_cast<uint32_t>(pos);
+
+                if (current_line > largest_line) {
+                    largest_line = current_line;
+                }
+            }
+        }
+
+        // for (int i = 0; i < line; i++) {
+        //     std::cout << "Offset for line " << i << ": " << line_offsets[i] << std::endl;
+        // }
+
+        last_line = line;
+
+        return line_string;
     }
+
+    // static std::streampos jump = 0;
+
+    // std::string ReadLine(const int line, const std::string& filepath) {
+    //     std::ifstream input(filepath);
+
+    //     if (!input.is_open()) {
+    //         std::cerr << "Failed to open file: " << filepath << std::endl;
+    //         return "";
+    //     }
+
+    //     if (filepath != lastpath) {
+    //         jump = 0;
+    //         last_line = 0;
+    //         largest_line = 1;
+    //         lastpath = filepath;
+    //     }
+
+    //     if (last_line < line) {
+    //         input.seekg(jump);
+    //     }
+
+    //     std::string line_string;
+
+    //     for (int current_line = last_line + 1; current_line <= line; current_line++) {
+    //         if (!std::getline(input, line_string)) {
+    //             throw std::out_of_range("Requested line number out of range");
+    //         }
+
+    //         std::streampos pos = input.tellg();
+
+    //         if (pos != EOF) {
+    //             jump = pos;
+    //         }
+    //     }
+
+    //     last_line = line;
+
+    //     return line_string;
+    // }
 
     std::string ReadFile(const std::string& filepath) {
         std::ifstream input(filepath);
@@ -68,6 +154,17 @@ namespace Utility {
 
         std::array<uint8_t, N_OUTPUT_NODES> true_outputs{};
         true_outputs[digit] = 1;
+
+        return true_outputs;
+    }
+
+    std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE> GetBatchedTrueOutputs(std::array<int, BATCH_SIZE> digits) {
+        std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE> true_outputs{};
+
+        for (int i = 0; i < BATCH_SIZE; i++) {
+            assert(digits[i] >= 0 && digits[i] < N_OUTPUT_NODES);
+            true_outputs[digits[i] + i * N_OUTPUT_NODES] = 1;
+        }
 
         return true_outputs;
     }

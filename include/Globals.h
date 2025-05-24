@@ -19,4 +19,6 @@
 #define TRAINING_ROWS 60000
 #define TESTING_ROWS 10000
 
+#define BATCH_SIZE 32
+
 extern void StartConsoleLoop();

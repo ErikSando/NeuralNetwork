@@ -3,6 +3,16 @@
 
 #include <Utility.h>
 
+void Matrix::Resize() {
+    elements.resize(rows * columns, 0.0f);
+}
+
+void Matrix::Resize(int r, int c) {
+    rows = r;
+    columns = c;
+    elements.resize(rows * columns, 0.0f);
+}
+
 Matrix Matrix::operator*(const Matrix& other) {
     int rows_2 = other.rows;
     int cols_2 = other.columns;
