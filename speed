@@ -13,6 +13,8 @@
 3220
 3540
 
+* no longer gets slower as the line number gets larger
+
 line reading improvements:
 
 1501

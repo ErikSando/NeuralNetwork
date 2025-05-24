@@ -51,7 +51,9 @@ void NeuralNetwork::LoadModel(const std::string& savepath) {
         }
 
         if (m_i < mat->elements.size()) {
-            std::cout << "Not enough " << types[m] << " for " << layer_name[m % (tl / 2)] << " (" << m_i << "/" << mat->elements.size() << "), some " << types[m] << " remain " << idk_what_to_call_this[m % (tl / 2)] << "." << std::endl;
+            std::cout << "Not enough " << types[m] << " for " << layer_name[m % (tl / 2)]
+                << " (" << m_i << "/" << mat->elements.size() << "), some " << types[m]
+                << " remain " << idk_what_to_call_this[m % (tl / 2)] << "." << std::endl;
         }
     }
 

@@ -19,13 +19,10 @@ class NeuralNetwork {
     NeuralNetwork();
     ~NeuralNetwork();
 
-    //std::array<float, N_OUTPUT_NODES> GetOutputs(const std::array<uint8_t, N_INPUT_NODES> inputs, int n_batches = -1);
     std::array<float, N_OUTPUT_NODES * BATCH_SIZE> GetOutputs(const std::array<uint8_t, N_INPUT_NODES * BATCH_SIZE> inputs);
 
     void Train(const int batches, const std::string& trainpath, const bool newpath = false);
-    //void Train(const int iterations, const std::string& trainpath, const bool newpath = false);
     void SetLearningRate(const float lr);
-    //void SetBatchSize(const int bs);
 
     TestingData* Test(const int iterations, const std::string& trainpath, const bool newpath = false);
 

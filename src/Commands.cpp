@@ -36,13 +36,14 @@ void StartConsoleLoop() {
         // And finally fix the uplo
         else if (cmd == "help") {
             std::cout << "help:\n- Shows this menu." << std::endl;
-            std::cout << "train [no. iterations]:\n- Train the model with the number of iterations specified. One iteration uses one image." << std::endl;
-            //std::cout << "test [mo. iterations]:\n- Test the model with the number of iterations specified. One iteration uses one image. The accuracy will be printed at the end." << std::endl;
+            std::cout << "train [no. epochs]:\n- Train the model with the number of epochs specified. One epoch goes through all of the training data. Default of 1 epoch." << std::endl;
+            std::cout << "trainb [no. batches]:\n- Train the model with the number of batches specified. One batch uses " << BATCH_SIZE << " images. Default of 1 batch." << std::endl;
+            std::cout << "test [no. iterations]:\n- Test the model with the number of iterations specified. One iteration uses one image. Accuracy will be printed at the end." << std::endl;
             //std::cout << "bs [batch size]:\n- Set the batch size of the model. Default value is 32. Small values will significantly limit training speed." << std::endl;
             std::cout << "lr [learning rate]:\n- Set the learning rate of the model. Default value is 0.001. Large values may break the model." << std::endl;
             std::cout << "save [save path]\n- Save model data to the specified save file." << std::endl;
             std::cout << "load [save path]:\n- (currently not working correctly) Load model data from the specified save file." << std::endl;
-            //std::cout << "id [image data path] [optional: correct digit]\n- Identify a digit in the data provided. If the correct digit is provided, a loss value will be printed." << std::endl;
+            std::cout << "id [image data path] [optional: correct digit]\n- Identify a digit in the data provided. If the correct digit is provided, a loss value will be printed." << std::endl;
             std::cout << "read [no. lines] [optional: path]\n- Test the time taken to read the specified number of lines from a file, and convert into input data. If no path is given, the default training CSV will be used." << std::endl;
         }
         else if (cmd == "save") {
@@ -159,22 +160,42 @@ void StartConsoleLoop() {
         //     std::cout << "Set batch size to " << batch_size << std::endl;
         // }
         else if (cmd == "train") {
-            int iterations = 1;
+            int epochs = 1;
             
             if (args.size() > 1) {
-                iterations = std::stoi(args.at(1));
+                epochs = std::stoi(args.at(1));
+            }
+
+            int batches = epochs * TRAINING_ROWS / BATCH_SIZE;
+    
+            std::cout << "Training..." << std::endl;
+
+            auto start = std::chrono::high_resolution_clock::now();
+    
+            network.Train(batches, "./data/mnistdata/mnist_train.csv");
+    
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+            std::cout << "Training complete for " << epochs << " epochs in " << duration << " ms." << std::endl;
+        }
+        else if (cmd == "trainb") {
+            int batches = 1;
+            
+            if (args.size() > 1) {
+                batches = std::stoi(args.at(1));
             }
     
             std::cout << "Training..." << std::endl;
 
             auto start = std::chrono::high_resolution_clock::now();
     
-            network.Train(iterations, "./data/mnistdata/mnist_train.csv");
+            network.Train(batches, "./data/mnistdata/mnist_train.csv");
     
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-            std::cout << "Training complete for " << iterations << " iterations in " << duration << " ms." << std::endl;
+            std::cout << "Training complete for " << batches << " batches in " << duration << " ms." << std::endl;
         }
         else if (cmd == "test") {
             int iterations = 1;
@@ -245,7 +266,6 @@ void StartConsoleLoop() {
             auto start = std::chrono::high_resolution_clock::now();
 
             for (int b = 0; b < batches; b++) {
-                //std::cout << (b * BATCH_SIZE + 1) << std::endl;
                 std::array<ImageData*, BATCH_SIZE> data = DataParser::GetBatchedTrainingData(b * BATCH_SIZE + 1, path);
                 
                 for (int i = 0; i < BATCH_SIZE; i++) {

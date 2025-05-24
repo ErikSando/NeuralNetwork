@@ -20,9 +20,6 @@ namespace Utility {
     std::array<uint8_t, N_OUTPUT_NODES> GetTrueOutputs(int digit);
     std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE> GetBatchedTrueOutputs(std::array<int, BATCH_SIZE> digits);
 
-    std::vector<float> RandomMatrixElements(int size, float min, float max);
-    void PrintMatrix(Matrix& matrix);
-
     namespace Activation {
         float Sigmoid(float z);
         float ReLU(float z);
