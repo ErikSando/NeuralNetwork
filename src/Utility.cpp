@@ -1,9 +1,9 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 #include <Utility.h>
 
@@ -149,24 +149,16 @@ namespace Utility {
         return contents.str();
     }
 
-    std::array<uint8_t, N_OUTPUT_NODES> GetTrueOutputs(int digit) {
+    void GetTrueOutputs(int digit, std::array<uint8_t, N_OUTPUT_NODES>& true_outputs) {
         assert(digit >= 0 && digit < N_OUTPUT_NODES);
-
-        std::array<uint8_t, N_OUTPUT_NODES> true_outputs{};
         true_outputs[digit] = 1;
-
-        return true_outputs;
     }
 
-    std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE> GetBatchedTrueOutputs(std::array<int, BATCH_SIZE> digits) {
-        std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE> true_outputs{};
-
+    void GetBatchedTrueOutputs(std::array<int, BATCH_SIZE> digits, std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE>& true_outputs) {
         for (int i = 0; i < BATCH_SIZE; i++) {
             assert(digits[i] >= 0 && digits[i] < N_OUTPUT_NODES);
             true_outputs[digits[i] + i * N_OUTPUT_NODES] = 1;
         }
-
-        return true_outputs;
     }
 
     namespace Activation {

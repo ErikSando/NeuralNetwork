@@ -95,8 +95,6 @@ void StartConsoleLoop() {
                 std::copy(data->pixels.begin(), data->pixels.end(), inputs.begin() + i * BATCH_SIZE * sizeof(uint8_t));
             }
 
-            delete data;
-
             std::array<float, N_OUTPUT_NODES * BATCH_SIZE> _outputs = network.GetOutputs(inputs);
             std::array<float, N_OUTPUT_NODES> outputs; // first 10
 
@@ -120,11 +118,13 @@ void StartConsoleLoop() {
             std::cout << "Identified digit: " << l_digit << " (" << largest << " probability)" << std::endl;
 
             if (digit_specified) {
-                std::array<uint8_t, N_OUTPUT_NODES> true_outputs = Utility::GetTrueOutputs(digit);
+                std::array<uint8_t, N_OUTPUT_NODES> true_outputs{};
+                //true_outputs[digit] = 1;
+                Utility::GetTrueOutputs(digit, true_outputs); // using this for the assert
 
                 #ifndef NDEBUG
 
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < N_OUTPUT_NODES; i++) {
                     uint8_t expected = (i == data->digit) ? 1 : 0;
                     assert(true_outputs[i] == expected);
                 }
@@ -134,6 +134,8 @@ void StartConsoleLoop() {
                 float loss = Utility::Loss::CategoricalCrossEntropy(true_outputs, outputs);
                 std::cout << "CCE Loss: " << loss << " (lower means more accurate)" << std::endl;
             }
+
+            delete data;
         }
         else if (cmd == "lr") {
             if (args.size() < 2) {

@@ -43,7 +43,7 @@ class NeuralNetwork {
     Matrix h2_nodes;
     Matrix out_nodes;
 
-    float learning_rate = 0.01;
+    float learning_rate = 0.001;
     //int batch_size = 32;
     int current_row = 1; // current row in the training data
     int c_testing_row = 1; // current row in the testing data

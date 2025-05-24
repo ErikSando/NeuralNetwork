@@ -17,8 +17,8 @@ namespace Random {
 namespace Utility {
     std::string ReadLine(const int line, const std::string& filepath);
     std::string ReadFile(const std::string& filepath);
-    std::array<uint8_t, N_OUTPUT_NODES> GetTrueOutputs(int digit);
-    std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE> GetBatchedTrueOutputs(std::array<int, BATCH_SIZE> digits);
+    void GetTrueOutputs(int digit, std::array<uint8_t, N_OUTPUT_NODES>& true_outputs);
+    void GetBatchedTrueOutputs(std::array<int, BATCH_SIZE> digits, std::array<uint8_t, N_OUTPUT_NODES * BATCH_SIZE>& true_outputs);
 
     namespace Activation {
         float Sigmoid(float z);
